@@ -56,13 +56,13 @@ const UserNavbar = () => {
           ) : (
             <>
               <button
-                onClick={() => navigate('/auth/login')}
+                onClick={() => navigate('/login')}
                 className="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition"
               >
                 Login
               </button>
               <button
-                onClick={() => navigate('/auth/register')}
+                onClick={() => navigate('/signup')}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
               >
                 Register

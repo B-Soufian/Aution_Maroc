@@ -1,7 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { User, AtSign, Mail, Phone, Lock } from 'lucide-react';
+import { registerUser, reset } from '../../features/auth/authSlice';
 
 const Register = () => {
+  const [formData, setFormData] = useState({
+    display_name: '',
+    username: '',
+    email: '',
+    phone: '',
+    password: '',
+    password_confirmation: '',
+  });
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Get state from Redux
+  const { user, isLoading, isError, message } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    // If user is already logged in, redirect based on role
+    if (user) {
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
+    }
+
+    if (isError) {
+      alert(message);
+    }
+
+    dispatch(reset());
+  }, [user, isError, message, navigate, dispatch]);
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    dispatch(registerUser(formData));
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white font-sans">
       
@@ -19,20 +63,24 @@ const Register = () => {
             Create Your Account
           </h1>
 
-          <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-8" onSubmit={onSubmit}>
             
             {/* Full Name */}
             <InputGroup 
               icon={<User size={22} />} 
               label="Full Name" 
-              placeholder="Enter your full name" 
+              placeholder="Enter your full name"
+              value={formData.display_name}
+              onChange={(e) => handleInputChange('display_name', e.target.value)}
             />
 
             {/* Username */}
             <InputGroup 
               icon={<AtSign size={22} />} 
               label="Username" 
-              placeholder="Choose a username" 
+              placeholder="Choose a username"
+              value={formData.username}
+              onChange={(e) => handleInputChange('username', e.target.value)}
             />
 
             {/* Email */}
@@ -40,7 +88,9 @@ const Register = () => {
               icon={<Mail size={22} />} 
               label="Email" 
               type="email"
-              placeholder="example@email.com" 
+              placeholder="example@email.com"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
             />
 
             {/* Phone Number */}
@@ -48,7 +98,9 @@ const Register = () => {
               icon={<Phone size={22} />} 
               label="Phone Number" 
               type="tel"
-              placeholder="+1 (555) 000-0000" 
+              placeholder="+1 (555) 000-0000"
+              value={formData.phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
             />
 
             {/* Password */}
@@ -56,23 +108,38 @@ const Register = () => {
               icon={<Lock size={22} />} 
               label="Password" 
               type="password"
-              placeholder="..........." 
+              placeholder="..........."
+              value={formData.password}
+              onChange={(e) => handleInputChange('password', e.target.value)}
+            />
+
+            {/* Confirm Password */}
+            <InputGroup 
+              icon={<Lock size={22} />} 
+              label="Confirm Password" 
+              type="password"
+              placeholder="..........."
+              value={formData.password_confirmation}
+              onChange={(e) => handleInputChange('password_confirmation', e.target.value)}
             />
 
             {/* Submit Button */}
-            <button className="w-full bg-[#8B0E1B] hover:bg-[#7a0c17] text-white font-bold py-4 rounded-lg transition-all shadow-lg mt-8 text-sm tracking-wider uppercase">
-              CREATE ACCOUNT
+            <button 
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-[#8B0E1B] hover:bg-[#7a0c17] disabled:opacity-50 text-white font-bold py-4 rounded-lg transition-all shadow-lg mt-8 text-sm tracking-wider uppercase"
+            >
+              {isLoading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
             </button>
 
             {/* Footer */}
             <p className="text-center text-gray-500 mt-6 text-sm font-medium">
-              Already have an account? <a href="/login" className="text-[#8B0E1B] hover:underline font-bold underline-offset-4 decoration-1">Log in</a>
+              Already have an account? <a href="/auth/login" className="text-[#8B0E1B] hover:underline font-bold underline-offset-4 decoration-1">Log in</a>
             </p>
           </form>
         </div>
       </section>
 
-      {/* RIGHT SIDE: HERO SECTION */}
       <section className="hidden lg:flex lg:w-[55%] relative overflow-hidden h-screen sticky top-0">
         {/* Background Image */}
         <img 
@@ -94,7 +161,7 @@ const Register = () => {
   );
 };
 
-const InputGroup = ({ icon, label, placeholder, type = "text" }) => (
+const InputGroup = ({ icon, label, placeholder, type = "text", value, onChange }) => (
   <div className="flex items-start gap-4 group">
     <div className="mt-7 text-gray-800 transition-colors group-focus-within:text-[#8B0E1B]">
       {icon}
@@ -106,6 +173,8 @@ const InputGroup = ({ icon, label, placeholder, type = "text" }) => (
       <input 
         type={type}
         placeholder={placeholder}
+        value={value}
+        onChange={onChange}
         className="w-full border-b border-gray-300 py-2 text-gray-800 placeholder-gray-400 outline-none transition-all focus:border-[#8B0E1B] focus:border-b-2 bg-transparent"
       />
     </div>

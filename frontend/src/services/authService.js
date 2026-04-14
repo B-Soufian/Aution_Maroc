@@ -1,6 +1,19 @@
 import api from './api';
 
 const authService = {
+  // Register a new user
+  register: async (userData) => {
+    const response = await api.post('/auth/register', userData);
+    
+    if (response.success) {
+      // Store the token for future requests
+      api.setToken(response.data.token);
+      return response.data;
+    }
+    
+    throw new Error(response.error || 'Registration failed');
+  },
+
   // Login with email and password
   login: async (credentials) => {
     const response = await api.post('/auth/login', credentials);
